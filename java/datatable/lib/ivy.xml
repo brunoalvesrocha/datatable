@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
+	<info organisation="org.pescuma" module="datatable" />
+
+	<configurations defaultconfmapping="compile->default,sources;runtime->default">
+		<conf name="compile" />
+		<conf name="runtime" />
+	</configurations>
+
+	<publications>
+		<artifact name="datatable" type="jar" />
+		<artifact name="datatable" type="pom" />
+		<artifact name="datatable" type="jar" e:classifier="sources" />
+	</publications>
+
+	<dependencies>
+		<dependency org="commons-io" name="commons-io" rev="2.4" />
+		<dependency org="com.google.guava" name="guava" rev="18.0" />
+		<dependency org="net.sf.opencsv" name="opencsv" rev="2.3" />
+
+		<dependency org="junit" name="junit" rev="4.12" conf="compile" />
+	</dependencies>
+</ivy-module>
