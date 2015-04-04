@@ -3,7 +3,6 @@
 	<property name="project" value="datatable" />
 	<property name="version" value="0.1" />
 
-	<import file="ivy.xml" />
 	<import file="project.xml" />
 
 	<property name="build.dir" value="${basedir}/build" />
