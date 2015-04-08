@@ -7,19 +7,6 @@ function MemoryDataTable(initialLines) {
 		return self._lines.length < 1;
 	};
 
-	self._columnsComparator = function (o1, o2) {
-		for (var i = 0; i < o1.length; i++) {
-			var l = o1.toLowerCase();
-			var r = o2.toLowerCase();
-			if (l < r)
-				return -1;
-			if (l > r)
-				return 1;
-		}
-
-		return 0;
-	};
-
 	self.add = function () {
 		if (arguments[0] && arguments[0].getLines) {
 			var lines = arguments[0].getLines();
@@ -125,8 +112,6 @@ function MemoryDataTable(initialLines) {
 
 		result = result.toArray();
 
-		result.sort(self._columnsComparator);
-
 		if (columns.length == 1)
 			result = result.map(function (e) { return e[0] });
 
@@ -202,7 +187,7 @@ function MemoryDataTable(initialLines) {
 	};
 
 	self.sum = function () {
-		return self._lines.reduce(function (total, line) { return total + line.getValue; }, 0);
+		return self._lines.reduce(function (total, line) { return total + line.getValue(); }, 0);
 	};
 
 	function _cleanup(info) {

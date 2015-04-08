@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -34,50 +33,6 @@ public class MemoryDataTable implements DataTable {
 	@Override
 	public boolean isEmpty() {
 		return lines.isEmpty();
-	}
-	
-	@Override
-	public Collection<String> getDistinct(int column) {
-		Set<String> result = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-		
-		for (Line line : lines)
-			result.add(line.getColumn(column));
-		
-		return Collections.unmodifiableCollection(result);
-	}
-	
-	@Override
-	public Collection<String[]> getDistinct(int... columns) {
-		Set<String[]> result = new TreeSet<String[]>(getColumnsComparator());
-		
-		for (Line line : lines)
-			result.add(line.getColumns(columns));
-		
-		return Collections.unmodifiableCollection(result);
-	}
-	
-	@Override
-	public DataTable groupBy(int... columns) {
-		DataTable result = new MemoryDataTable();
-		
-		for (Line line : lines)
-			result.inc(line.getValue(), line.getColumns(columns));
-		
-		return result;
-	}
-	
-	private Comparator<String[]> getColumnsComparator() {
-		return new Comparator<String[]>() {
-			@Override
-			public int compare(String[] o1, String[] o2) {
-				for (int i = 0; i < o1.length; i++) {
-					int comp = o1[i].compareToIgnoreCase(o2[i]);
-					if (comp != 0)
-						return comp;
-				}
-				return 0;
-			}
-		};
 	}
 	
 	@Override
@@ -155,6 +110,36 @@ public class MemoryDataTable implements DataTable {
 				return line.getColumns(columns);
 			}
 		});
+	}
+	
+	@Override
+	public Collection<String> getDistinct(int column) {
+		Set<String> result = new HashSet<String>();
+		
+		for (Line line : lines)
+			result.add(line.getColumn(column));
+		
+		return Collections.unmodifiableCollection(result);
+	}
+	
+	@Override
+	public Collection<String[]> getDistinct(int... columns) {
+		Set<String[]> result = new HashSet<String[]>();
+		
+		for (Line line : lines)
+			result.add(line.getColumns(columns));
+		
+		return Collections.unmodifiableCollection(result);
+	}
+	
+	@Override
+	public DataTable groupBy(int... columns) {
+		DataTable result = new MemoryDataTable();
+		
+		for (Line line : lines)
+			result.inc(line.getValue(), line.getColumns(columns));
+		
+		return result;
 	}
 	
 	@Override
