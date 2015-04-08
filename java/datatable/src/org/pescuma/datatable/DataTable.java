@@ -25,10 +25,15 @@ public interface DataTable {
 	
 	Collection<String> getColumn(int column);
 	
+	/** @param columns null or empty to get all */
+	Collection<String[]> getColumns(int... columns);
+	
 	Collection<String> getDistinct(int column);
 	
+	/** @param columns null or empty to get all */
 	Collection<String[]> getDistinct(int... columns);
 	
+	/** @param columns null or empty to get all */
 	DataTable groupBy(int... columns);
 	
 	DataTable filter(String... info);
@@ -43,25 +48,12 @@ public interface DataTable {
 	
 	double sum();
 	
-	/** @param column null or empty to get all */
-	Collection<String[]> getColumns(int... columns);
-	
 	public interface Line {
 		double getValue();
 		
 		String getColumn(int column);
 		
-		/** @param column null or empty to get all */
+		/** @param columns null or empty to get all */
 		String[] getColumns(int... columns);
 	}
-	
-	public static class Value {
-		public double value;
-		
-		@Override
-		public String toString() {
-			return Double.toString(value);
-		}
-	}
-	
 }

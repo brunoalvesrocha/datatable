@@ -7,39 +7,6 @@ function MemoryDataTable(initialLines) {
 		return self._lines.length < 1;
 	};
 
-	self.getDistinct = function (columns) {
-		if (!_isArray(columns))
-			columns = arguments;
-
-		var result = new SimpleSet(function (e) { return e.join("\n"); });
-
-		for (var i = 0; i < self._lines.length; ++i)
-			result.add(self._lines[i].getColumns(columns));
-
-		result = result.toArray();
-
-		result.sort(self._columnsComparator);
-
-		if (columns.length == 1)
-			result = result.map(function (e) { return e[0] });
-
-		return result;
-	};
-
-	self.groupBy = function (columns) {
-		if (!_isArray(columns))
-			columns = arguments;
-
-		var result = new MemoryDataTable();
-
-		for (var i = 0; i < self._lines.length; ++i) {
-			var line = self._lines[i];
-			result.inc(line.getValue(), line.getColumns(columns));
-		}
-
-		return result;
-	};
-
 	self._columnsComparator = function (o1, o2) {
 		for (var i = 0; i < o1.length; i++) {
 			var l = o1.toLowerCase();
@@ -132,6 +99,54 @@ function MemoryDataTable(initialLines) {
 		return filtered[0].getValue();
 	};
 
+	self.getColumn = function (column) {
+		return self._lines.map(function (line) {
+			return line.getColumn(column);
+		});
+	};
+
+	self.getColumns = function (columns) {
+		if (!_isArray(columns))
+			columns = arguments;
+
+		return self._lines.map(function (line) {
+			return line.getColumns(columns);
+		});
+	};
+
+	self.getDistinct = function (columns) {
+		if (!_isArray(columns))
+			columns = arguments;
+
+		var result = new SimpleSet(function (e) { return e.join("\n"); });
+
+		for (var i = 0; i < self._lines.length; ++i)
+			result.add(self._lines[i].getColumns(columns));
+
+		result = result.toArray();
+
+		result.sort(self._columnsComparator);
+
+		if (columns.length == 1)
+			result = result.map(function (e) { return e[0] });
+
+		return result;
+	};
+
+	self.groupBy = function (columns) {
+		if (!_isArray(columns))
+			columns = arguments;
+
+		var result = new MemoryDataTable();
+
+		for (var i = 0; i < self._lines.length; ++i) {
+			var line = self._lines[i];
+			result.inc(line.getValue(), line.getColumns(columns));
+		}
+
+		return result;
+	};
+
 	self.filter = function () {
 		if (typeof arguments[0] === "number" && typeof arguments[1] === "function") {
 			var column = arguments[0];
@@ -155,6 +170,9 @@ function MemoryDataTable(initialLines) {
 			return new MemoryDataTable(self._lines.filter(predicate));
 
 		} else {
+			if (arguments.length < 1)
+				return self;
+
 			var columns = arguments[0];
 			if (!_isArray(columns))
 				columns = arguments;
@@ -185,21 +203,6 @@ function MemoryDataTable(initialLines) {
 
 	self.sum = function () {
 		return self._lines.reduce(function (total, line) { return total + line.getValue; }, 0);
-	};
-
-	self.getColumn = function (column) {
-		return self._lines.map(function (line) {
-			return line.getColumn(column);
-		});
-	};
-
-	self.getColumns = function (columns) {
-		if (!_isArray(columns))
-			columns = arguments;
-
-		return self._lines.map(function (line) {
-			return line.getColumns(columns);
-		});
 	};
 
 	function _cleanup(info) {

@@ -138,7 +138,30 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable filter(final String... columns) {
+	public Collection<String> getColumn(final int column) {
+		return Collections2.transform(lines, new Function<Line, String>() {
+			@Override
+			public String apply(Line line) {
+				return line.getColumn(column);
+			}
+		});
+	}
+	
+	@Override
+	public Collection<String[]> getColumns(final int... columns) {
+		return Collections2.transform(lines, new Function<Line, String[]>() {
+			@Override
+			public String[] apply(Line line) {
+				return line.getColumns(columns);
+			}
+		});
+	}
+	
+	@Override
+	public MemoryDataTable filter(final String... columns) {
+		if (columns == null || columns.length < 1)
+			return this;
+		
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
 			public boolean apply(LineImpl line) {
@@ -149,7 +172,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable filter(final int column, final String value) {
+	public MemoryDataTable filter(final int column, final String value) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
 			public boolean apply(LineImpl line) {
@@ -160,7 +183,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable filter(final Predicate<Line> predicate) {
+	public MemoryDataTable filter(final Predicate<Line> predicate) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
 			public boolean apply(LineImpl line) {
@@ -171,7 +194,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable filter(final int column, final Predicate<String> predicate) {
+	public MemoryDataTable filter(final int column, final Predicate<String> predicate) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
 			public boolean apply(LineImpl line) {
@@ -182,7 +205,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable map(final int column, final Function<String, String> transform) {
+	public MemoryDataTable map(final int column, final Function<String, String> transform) {
 		Collection<LineImpl> newLines = Collections2.transform(lines, new Function<LineImpl, LineImpl>() {
 			@Override
 			public LineImpl apply(LineImpl line) {
@@ -210,26 +233,6 @@ public class MemoryDataTable implements DataTable {
 		for (Line line : lines)
 			result += line.getValue();
 		return result;
-	}
-	
-	@Override
-	public Collection<String> getColumn(final int column) {
-		return Collections2.transform(lines, new Function<Line, String>() {
-			@Override
-			public String apply(Line line) {
-				return line.getColumn(column);
-			}
-		});
-	}
-	
-	@Override
-	public Collection<String[]> getColumns(final int... columns) {
-		return Collections2.transform(lines, new Function<Line, String[]>() {
-			@Override
-			public String[] apply(Line line) {
-				return line.getColumns(columns);
-			}
-		});
 	}
 	
 	private String[] cleanup(String... info) {
