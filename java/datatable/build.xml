@@ -1,6 +1,5 @@
 <project name="datatable" default="all">
 
-	<property name="project" value="datatable" />
 	<property name="version" value="0.1" />
 	<property name="ivy.publish.root" value="https://api.bintray.com/maven/pescuma/datatable/datatable" />
 
