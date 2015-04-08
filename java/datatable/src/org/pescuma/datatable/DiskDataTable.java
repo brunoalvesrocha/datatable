@@ -2,8 +2,8 @@ package org.pescuma.datatable;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Map;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 public class DiskDataTable implements DataTable {
@@ -34,6 +34,12 @@ public class DiskDataTable implements DataTable {
 			return;
 		
 		DataTableSerialization.loadFromCSV(this, file);
+	}
+	
+	@Override
+	public int size() {
+		loadFromDisk();
+		return data.size();
 	}
 	
 	@Override
@@ -99,13 +105,7 @@ public class DiskDataTable implements DataTable {
 	}
 	
 	@Override
-	public Map<String, Value> sumDistinct(int columns) {
-		loadFromDisk();
-		return data.sumDistinct(columns);
-	}
-	
-	@Override
-	public Map<String[], Value> sumDistinct(int... columns) {
+	public DataTable sumDistinct(int... columns) {
 		loadFromDisk();
 		return data.sumDistinct(columns);
 	}
@@ -135,15 +135,15 @@ public class DiskDataTable implements DataTable {
 	}
 	
 	@Override
-	public double sum() {
+	public DataTable map(int column, Function<String, String> transform) {
 		loadFromDisk();
-		return data.sum();
+		return data.map(column, transform);
 	}
 	
 	@Override
-	public int size() {
+	public double sum() {
 		loadFromDisk();
-		return data.size();
+		return data.sum();
 	}
 	
 	@Override

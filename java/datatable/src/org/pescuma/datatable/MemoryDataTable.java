@@ -7,9 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.google.common.base.Function;
@@ -29,79 +27,48 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public boolean isEmpty() {
-		return lines.isEmpty();
+	public int size() {
+		return lines.size();
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Collection<Line> getLines() {
-		return (Collection) Collections.unmodifiableCollection(lines);
+	public boolean isEmpty() {
+		return lines.isEmpty();
 	}
 	
 	@Override
 	public Collection<String> getDistinct(int column) {
 		// By default sort by the columns text
-		Set<String> result = new TreeSet<String>();
-		for (Line line : lines) {
-			String info = line.getColumn(column);
-			result.add(info);
-		}
+		Set<String> result = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		
+		for (Line line : lines)
+			result.add(line.getColumn(column));
+		
 		return Collections.unmodifiableCollection(result);
 	}
 	
 	@Override
 	public Collection<String[]> getDistinct(int... columns) {
 		// By default sort by the columns text
-		Set<String[]> result = new TreeSet<String[]>(getLinesComparator());
-		for (Line line : lines) {
-			String[] info = line.getColumns(columns);
-			result.add(info);
-		}
+		Set<String[]> result = new TreeSet<String[]>(getColumnsComparator());
+		
+		for (Line line : lines)
+			result.add(line.getColumns(columns));
+		
 		return Collections.unmodifiableCollection(result);
 	}
 	
 	@Override
-	public Map<String, Value> sumDistinct(int columns) {
-		// By default sort by the columns text
-		Map<String, Value> result = new TreeMap<String, Value>(String.CASE_INSENSITIVE_ORDER);
+	public DataTable sumDistinct(int... columns) {
+		DataTable result = new MemoryDataTable();
 		
-		for (Line line : lines) {
-			String key = line.getColumn(columns);
-			
-			Value value = result.get(key);
-			if (value == null) {
-				value = new Value();
-				result.put(key, value);
-			}
-			
-			value.value += line.getValue();
-		}
+		for (Line line : lines)
+			result.inc(line.getValue(), line.getColumns(columns));
 		
 		return result;
 	}
 	
-	@Override
-	public Map<String[], Value> sumDistinct(int... columns) {
-		// By default sort by the columns text
-		Map<String[], Value> result = new TreeMap<String[], Value>(getLinesComparator());
-		
-		for (Line line : lines) {
-			String[] key = line.getColumns(columns);
-			
-			Value value = result.get(key);
-			if (value == null) {
-				value = new Value();
-				result.put(key, value);
-			}
-			
-			value.value += line.getValue();
-		}
-		
-		return result;
-	}
-	
-	private Comparator<String[]> getLinesComparator() {
+	private Comparator<String[]> getColumnsComparator() {
 		return new Comparator<String[]>() {
 			@Override
 			public int compare(String[] o1, String[] o2) {
@@ -116,16 +83,16 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public void add(double value, String... info) {
-		info = cleanup(info);
-		lines.add(new LineImpl(value, info));
+	public void add(double value, String... columns) {
+		columns = cleanup(columns);
+		lines.add(new LineImpl(value, columns));
 	}
 	
 	@Override
-	public void inc(double value, String... info) {
-		Collection<LineImpl> items = getItems(info);
+	public void inc(double value, String... columns) {
+		Collection<LineImpl> items = getLines(columns);
 		if (items.isEmpty())
-			add(value, info);
+			add(value, columns);
 		else
 			items.iterator().next().value += value;
 	}
@@ -133,7 +100,7 @@ public class MemoryDataTable implements DataTable {
 	@Override
 	public void add(DataTable other) {
 		for (Line line : other.getLines())
-			add(line.getValue(), line.getColumns());
+			lines.add(new LineImpl(line.getValue(), line.getColumns()));
 	}
 	
 	@Override
@@ -142,38 +109,42 @@ public class MemoryDataTable implements DataTable {
 			inc(line.getValue(), line.getColumns());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public double get(final String... info) {
-		Collection<LineImpl> filtered = getItems(info);
-		
-		int size = filtered.size();
-		if (size > 1)
-			throw new IllegalArgumentException("More than one line has info " + Arrays.toString(info));
-		if (size < 1)
-			throw new IllegalArgumentException("Line not found " + Arrays.toString(info));
-		
-		return filtered.iterator().next().value;
+	public Collection<Line> getLines() {
+		return (Collection) Collections.unmodifiableCollection(lines);
 	}
 	
-	private Collection<LineImpl> getItems(String... aInfo) {
-		final String[] info = cleanup(aInfo);
+	private Collection<LineImpl> getLines(final String... aColumns) {
+		final String[] columns = cleanup(aColumns);
 		
 		return Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
-			public boolean apply(LineImpl input) {
-				return input.info.length <= info.length && input.infoStartsWith(info);
+			public boolean apply(LineImpl line) {
+				return Arrays.equals(columns, line.columns);
 			}
 		});
 	}
 	
 	@Override
-	public DataTable filter(String... aInfo) {
-		final String[] info = cleanup(aInfo);
+	public double get(final String... columns) {
+		Collection<LineImpl> filtered = getLines(columns);
 		
+		int size = filtered.size();
+		if (size > 1)
+			throw new IllegalArgumentException("More than one line has info: " + Arrays.toString(columns));
+		if (size < 1)
+			throw new IllegalArgumentException("Line not found: " + Arrays.toString(columns));
+		
+		return filtered.iterator().next().getValue();
+	}
+	
+	@Override
+	public DataTable filter(final String... columns) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
-			public boolean apply(LineImpl input) {
-				return input.infoStartsWith(info);
+			public boolean apply(LineImpl line) {
+				return line.infoStartsWith(columns);
 			}
 		});
 		return new MemoryDataTable(filtered);
@@ -183,8 +154,8 @@ public class MemoryDataTable implements DataTable {
 	public DataTable filter(final int column, final String value) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
-			public boolean apply(LineImpl input) {
-				return input.hasInfo(column, value);
+			public boolean apply(LineImpl line) {
+				return line.hasInfo(column, value);
 			}
 		});
 		return new MemoryDataTable(filtered);
@@ -194,8 +165,8 @@ public class MemoryDataTable implements DataTable {
 	public DataTable filter(final Predicate<Line> predicate) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
-			public boolean apply(LineImpl input) {
-				return predicate.apply(input);
+			public boolean apply(LineImpl line) {
+				return predicate.apply(line);
 			}
 		});
 		return new MemoryDataTable(filtered);
@@ -205,11 +176,34 @@ public class MemoryDataTable implements DataTable {
 	public DataTable filter(final int column, final Predicate<String> predicate) {
 		Collection<LineImpl> filtered = Collections2.filter(lines, new Predicate<LineImpl>() {
 			@Override
-			public boolean apply(LineImpl input) {
-				return predicate.apply(input.getColumn(column));
+			public boolean apply(LineImpl line) {
+				return predicate.apply(line.getColumn(column));
 			}
 		});
 		return new MemoryDataTable(filtered);
+	}
+	
+	@Override
+	public DataTable map(final int column, final Function<String, String> transform) {
+		Collection<LineImpl> newLines = Collections2.transform(lines, new Function<LineImpl, LineImpl>() {
+			@Override
+			public LineImpl apply(LineImpl line) {
+				String orig = line.getColumn(column);
+				String transformed = transform.apply(orig);
+				
+				if (orig.equals(transformed))
+					return line;
+				
+				String[] columns = Arrays.copyOf(line.columns, Math.max(line.columns.length, column + 1));
+				columns[column] = transformed;
+				
+				if (column + 1 > line.columns.length)
+					columns = cleanup(columns);
+				
+				return new LineImpl(line.value, columns);
+			}
+		});
+		return new MemoryDataTable(newLines);
 	}
 	
 	@Override
@@ -221,16 +215,11 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public int size() {
-		return lines.size();
-	}
-	
-	@Override
 	public Collection<String> getColumn(final int column) {
 		return Collections2.transform(lines, new Function<Line, String>() {
 			@Override
-			public String apply(Line input) {
-				return input.getColumn(column);
+			public String apply(Line line) {
+				return line.getColumn(column);
 			}
 		});
 	}
@@ -239,16 +228,28 @@ public class MemoryDataTable implements DataTable {
 	public Collection<String[]> getColumns(final int... columns) {
 		return Collections2.transform(lines, new Function<Line, String[]>() {
 			@Override
-			public String[] apply(Line input) {
-				return input.getColumns(columns);
+			public String[] apply(Line line) {
+				return line.getColumns(columns);
 			}
 		});
 	}
 	
 	private String[] cleanup(String... info) {
-		info = replaceNull(info);
 		info = removeEmptyAtEnd(info);
+		info = replaceNull(info);
 		return info;
+	}
+	
+	private String[] removeEmptyAtEnd(String[] info) {
+		int last = info.length - 1;
+		for (; last > 0; last--)
+			if (info[last] != null && !info[last].isEmpty())
+				break;
+		last++;
+		if (last == info.length)
+			return info;
+		else
+			return copyOf(info, last);
 	}
 	
 	private String[] replaceNull(String[] info) {
@@ -257,10 +258,9 @@ public class MemoryDataTable implements DataTable {
 			return info;
 		
 		String[] result = Arrays.copyOf(info, info.length);
-		for (int i = nullPos; i < result.length; i++) {
+		for (int i = nullPos; i < result.length; i++)
 			if (result[i] == null)
 				result[i] = "";
-		}
 		return result;
 	}
 	
@@ -271,40 +271,35 @@ public class MemoryDataTable implements DataTable {
 		return -1;
 	}
 	
-	private String[] removeEmptyAtEnd(String[] info) {
-		int last = info.length - 1;
-		for (; last > 0 && info[last].isEmpty(); last--)
-			;
-		last++;
-		if (last == info.length)
-			return info;
-		else
-			return copyOf(info, last);
-	}
-	
 	private static class LineImpl implements Line {
 		
 		double value;
-		final String[] info;
+		final String[] columns;
 		
-		LineImpl(double value, String[] info) {
+		LineImpl(double value, String[] columns) {
 			this.value = value;
-			this.info = info;
+			this.columns = columns;
+		}
+		
+		private boolean equalsIgnoreNull(String a, String b) {
+			if (a == null)
+				a = "";
+			if (b == null)
+				b = "";
+			return a.equals(b);
 		}
 		
 		boolean hasInfo(int column, String name) {
-			if (column >= info.length)
-				return name.isEmpty();
+			if (column >= columns.length)
+				return equalsIgnoreNull("", name);
 			
-			return info[column].equals(name);
+			return equalsIgnoreNull(columns[column], name);
 		}
 		
 		boolean infoStartsWith(String[] start) {
-			for (int i = 0; i < start.length; i++) {
-				String val = getColumn(i);
-				if (!val.equals(start[i]))
+			for (int i = 0; i < start.length; i++)
+				if (!equalsIgnoreNull(getColumn(i), start[i]))
 					return false;
-			}
 			
 			return true;
 		}
@@ -316,27 +311,26 @@ public class MemoryDataTable implements DataTable {
 		
 		@Override
 		public String getColumn(int column) {
-			if (column < info.length)
-				return info[column];
-			else
+			if (column >= columns.length)
 				return "";
+			
+			return columns[column];
 		}
 		
 		@Override
-		public String[] getColumns(int... columns) {
-			if (columns == null || columns.length == 0)
-				return info;
+		public String[] getColumns(int... columnIndexes) {
+			if (columnIndexes == null || columnIndexes.length == 0)
+				return columns;
 			
-			String[] result = new String[columns.length];
-			for (int i = 0; i < columns.length; i++)
-				result[i] = getColumn(columns[i]);
+			String[] result = new String[columnIndexes.length];
+			for (int i = 0; i < columnIndexes.length; i++)
+				result[i] = getColumn(columnIndexes[i]);
 			return result;
 		}
 		
 		@Override
 		public String toString() {
-			return "LineImpl [" + value + " " + Arrays.toString(info) + "]";
+			return "LineImpl [" + value + " " + Arrays.toString(columns) + "]";
 		}
 	}
-	
 }

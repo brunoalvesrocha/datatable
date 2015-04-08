@@ -1,11 +1,13 @@
 package org.pescuma.datatable;
 
 import java.util.Collection;
-import java.util.Map;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 public interface DataTable {
+	
+	int size();
 	
 	boolean isEmpty();
 	
@@ -17,17 +19,17 @@ public interface DataTable {
 	
 	void inc(DataTable other);
 	
+	Collection<Line> getLines();
+	
 	double get(String... info);
 	
-	Collection<Line> getLines();
+	Collection<String> getColumn(int column);
 	
 	Collection<String> getDistinct(int column);
 	
 	Collection<String[]> getDistinct(int... columns);
 	
-	Map<String, Value> sumDistinct(int columns);
-	
-	Map<String[], Value> sumDistinct(int... columns);
+	DataTable sumDistinct(int... columns);
 	
 	DataTable filter(String... info);
 	
@@ -37,11 +39,9 @@ public interface DataTable {
 	
 	DataTable filter(int column, Predicate<String> predicate);
 	
+	DataTable map(int column, Function<String, String> transform);
+	
 	double sum();
-	
-	int size();
-	
-	Collection<String> getColumn(int column);
 	
 	/** @param column null or empty to get all */
 	Collection<String[]> getColumns(int... columns);
@@ -63,4 +63,5 @@ public interface DataTable {
 			return Double.toString(value);
 		}
 	}
+	
 }

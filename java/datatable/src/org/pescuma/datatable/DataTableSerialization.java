@@ -78,13 +78,13 @@ public class DataTableSerialization {
 	}
 	
 	private static CSVWriter newCSVWriter(Writer writer) {
-		return new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR,
-				CSVWriter.DEFAULT_QUOTE_CHARACTER, CSVWriter.DEFAULT_ESCAPE_CHARACTER);
+		return new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+				CSVWriter.DEFAULT_ESCAPE_CHARACTER);
 	}
 	
 	private static CSVReader newCSVReader(Reader reader) {
-		return new CSVReader(reader, CSVWriter.DEFAULT_SEPARATOR,
-				CSVWriter.DEFAULT_QUOTE_CHARACTER, CSVParser.NULL_CHARACTER);
+		return new CSVReader(reader, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+				CSVParser.NULL_CHARACTER);
 	}
 	
 }
