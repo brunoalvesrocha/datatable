@@ -29,7 +29,7 @@ public interface DataTable {
 	
 	Collection<String[]> getDistinct(int... columns);
 	
-	DataTable sumDistinct(int... columns);
+	DataTable groupBy(int... columns);
 	
 	DataTable filter(String... info);
 	

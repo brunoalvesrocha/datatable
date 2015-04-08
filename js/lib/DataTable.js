@@ -26,7 +26,7 @@ function MemoryDataTable(initialLines) {
 		return result;
 	};
 
-	self.sumDistinct = function (columns) {
+	self.groupBy = function (columns) {
 		if (!_isArray(columns))
 			columns = arguments;
 
@@ -40,26 +40,13 @@ function MemoryDataTable(initialLines) {
 		return result;
 	};
 
-	self._columnComparator = function (o1, o2) {
-		o1 = o1.toLowerCase();
-		o2 = o2.toLowerCase();
-
-		if (o1 < o2)
-			return -1;
-		else if (o1 > o2)
-			return 1;
-		else
-			return 0;
-	};
-
 	self._columnsComparator = function (o1, o2) {
-		o1 = o1.toLowerCase();
-		o2 = o2.toLowerCase();
-
 		for (var i = 0; i < o1.length; i++) {
-			if (o1 < o2)
+			var l = o1.toLowerCase();
+			var r = o2.toLowerCase();
+			if (l < r)
 				return -1;
-			if (o1 > o2)
+			if (l > r)
 				return 1;
 		}
 

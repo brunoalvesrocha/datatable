@@ -105,9 +105,9 @@ public class DiskDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable sumDistinct(int... columns) {
+	public DataTable groupBy(int... columns) {
 		loadFromDisk();
-		return data.sumDistinct(columns);
+		return data.groupBy(columns);
 	}
 	
 	@Override

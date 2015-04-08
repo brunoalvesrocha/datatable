@@ -38,7 +38,6 @@ public class MemoryDataTable implements DataTable {
 	
 	@Override
 	public Collection<String> getDistinct(int column) {
-		// By default sort by the columns text
 		Set<String> result = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		
 		for (Line line : lines)
@@ -49,7 +48,6 @@ public class MemoryDataTable implements DataTable {
 	
 	@Override
 	public Collection<String[]> getDistinct(int... columns) {
-		// By default sort by the columns text
 		Set<String[]> result = new TreeSet<String[]>(getColumnsComparator());
 		
 		for (Line line : lines)
@@ -59,7 +57,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable sumDistinct(int... columns) {
+	public DataTable groupBy(int... columns) {
 		DataTable result = new MemoryDataTable();
 		
 		for (Line line : lines)
