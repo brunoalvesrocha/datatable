@@ -1,6 +1,6 @@
 function MemoryDataTable(initialLines) {
 	var self = this;
-
+	
 	self._lines = initialLines || [];
 
 	self.isEmpty = function () {
