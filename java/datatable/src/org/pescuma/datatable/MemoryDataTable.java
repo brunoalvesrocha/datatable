@@ -26,7 +26,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public int size() {
+	public int count() {
 		return lines.size();
 	}
 	
@@ -190,7 +190,7 @@ public class MemoryDataTable implements DataTable {
 	}
 	
 	@Override
-	public MemoryDataTable map(final int column, final Function<String, String> transform) {
+	public MemoryDataTable mapColumn(final int column, final Function<String, String> transform) {
 		Collection<LineImpl> newLines = Collections2.transform(lines, new Function<LineImpl, LineImpl>() {
 			@Override
 			public LineImpl apply(LineImpl line) {

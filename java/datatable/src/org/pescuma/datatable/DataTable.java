@@ -7,7 +7,7 @@ import com.google.common.base.Predicate;
 
 public interface DataTable {
 	
-	int size();
+	int count();
 	
 	boolean isEmpty();
 	
@@ -44,7 +44,7 @@ public interface DataTable {
 	
 	DataTable filter(int column, Predicate<String> predicate);
 	
-	DataTable map(int column, Function<String, String> transform);
+	DataTable mapColumn(int column, Function<String, String> transform);
 	
 	double sum();
 	

@@ -37,9 +37,9 @@ public class DiskDataTable implements DataTable {
 	}
 	
 	@Override
-	public int size() {
+	public int count() {
 		loadFromDisk();
-		return data.size();
+		return data.count();
 	}
 	
 	@Override
@@ -135,9 +135,9 @@ public class DiskDataTable implements DataTable {
 	}
 	
 	@Override
-	public DataTable map(int column, Function<String, String> transform) {
+	public DataTable mapColumn(int column, Function<String, String> transform) {
 		loadFromDisk();
-		return data.map(column, transform);
+		return data.mapColumn(column, transform);
 	}
 	
 	@Override
