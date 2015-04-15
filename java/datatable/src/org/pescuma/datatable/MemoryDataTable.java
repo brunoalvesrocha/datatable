@@ -7,7 +7,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.pescuma.datatable.func.Function2;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -210,6 +213,34 @@ public class MemoryDataTable implements DataTable {
 			}
 		});
 		return new MemoryDataTable(newLines);
+	}
+	
+	@Override
+	public DataTable mapColumn(final int column, final Function2<String, String, Line> transform) {
+		Collection<LineImpl> newLines = Collections2.transform(lines, new Function<LineImpl, LineImpl>() {
+			@Override
+			public LineImpl apply(LineImpl line) {
+				String orig = line.getColumn(column);
+				String transformed = transform.apply(orig, line);
+				
+				if (orig.equals(transformed))
+					return line;
+				
+				String[] columns = Arrays.copyOf(line.columns, Math.max(line.columns.length, column + 1));
+				columns[column] = transformed;
+				
+				if (column + 1 > line.columns.length)
+					columns = cleanup(columns);
+				
+				return new LineImpl(line.value, columns);
+			}
+		});
+		return new MemoryDataTable(newLines);
+	}
+	
+	@Override
+	public <T> List<T> map(Function<Line, T> transform) {
+		return new ArrayList<T>(Collections2.transform(lines, transform));
 	}
 	
 	@Override

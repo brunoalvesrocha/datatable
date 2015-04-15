@@ -179,7 +179,7 @@ function MemoryDataTable(initialLines) {
 	self.mapColumn = function (column, transform) {
 		return new MemoryDataTable(self._lines.map(function (line) {
 			var orig = line.getColumn(column);
-			var transformed = transform(orig);
+			var transformed = transform(orig, line);
 			
 			if (orig == transformed)
 				return line;

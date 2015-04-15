@@ -2,6 +2,9 @@ package org.pescuma.datatable;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
+
+import org.pescuma.datatable.func.Function2;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -138,6 +141,18 @@ public class DiskDataTable implements DataTable {
 	public DataTable mapColumn(int column, Function<String, String> transform) {
 		loadFromDisk();
 		return data.mapColumn(column, transform);
+	}
+	
+	@Override
+	public DataTable mapColumn(int column, Function2<String, String, Line> transform) {
+		loadFromDisk();
+		return data.mapColumn(column, transform);
+	}
+	
+	@Override
+	public <T> List<T> map(Function<Line, T> transform) {
+		loadFromDisk();
+		return data.map(transform);
 	}
 	
 	@Override
